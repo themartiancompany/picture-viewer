@@ -29,8 +29,7 @@ _requirements() {
     uname \
       -o)"
   _check_cmd \
-    'cat' \
-    'coreutils'
+    'ascii-viewer'
   if [[ "${_os}" == "Android" ]]; then
     _check_cmd \
       'termux-open' \
@@ -52,14 +51,18 @@ _get_conf_dir_path() {
 _picture_viewer() {
   local \
     _target_viewer="${1}" \
-    _image_type="${1}" \
+    _image_type="${2}" \
     _in=()
   shift \
-    1
+    2
   _in+=(
     "$@"
   )
-  "_${_viewer}" \
+  _msg_info \
+    "command: ${_target_viewer}"
+  _msg_info \
+    "argument: ${_in[*]}"
+  "${_target_viewer}" \
     "${_in[@]}"
 }
 
@@ -88,7 +91,7 @@ _viewer_auto_detect(){
     _viewer="xdg-open"
   fi
   if [[ "${image_type}" == "text" ]]; then
-    _viewer="cat"
+    _viewer="ascii-viewer"
   fi
   echo \
     "${_viewer}"
@@ -138,7 +141,7 @@ Usage:
     [options]
     [in_file]
   options:
-     -i <image_type>      It can be 'raw' or 'text'
+     -t <image_type>      It can be 'raw' or 'text'
                           Default: '$(_get "image" "type")'
      -p <target_viewer>   Use a specific viewer
                           ('cacaview', 'termux-open',
@@ -171,11 +174,11 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'i:p:cvh?' \
+    't:p:cvh?' \
     arg; do
   case \
     "${arg}" in
-    i) override_image_type="${OPTARG}" ;;
+    t) override_image_type="${OPTARG}" ;;
     p) override_target_viewer="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
