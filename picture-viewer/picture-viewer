@@ -14,21 +14,27 @@ source \
 
 # shellcheck disable=SC2034
 _global_variables() {
-  build_date=""
-  compiler_backend=""
-  target_contracts=()
-  out_dir=""
-  work_dir=""
+  view_date=""
+  in_file=()
+  image_type=""
   color=""
   quiet=""
 }
 
 _requirements() {
+  local \
+    _os
+  _os="$( \
+    uname \
+      -o)"
   _check_cmd \
-    'node' \
-    'nodejs'
-  _check_cmd \
-    'npx'
+    'cat' \
+    'coreutils'
+  if [[ "${_os}" == "Android" ]]; then
+    _check_cmd \
+      'termux-open' \
+      'termux-tools'
+  fi
 }
 
 _get_conf_dir_path() {
@@ -42,11 +48,10 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-
-
 _picture_viewer() {
   local \
     _target_viewer="${1}" \
+    _image_type="${1}" \
     _in=()
   shift \
     1
@@ -132,6 +137,8 @@ Usage:
     [options]
     [in_file]
   options:
+     -i <image_type>      It can be 'raw' or 'text'
+                          Default: '$(_get "image" "type")'
      -p <target_viewer>   Use a specific viewer
                           ('cacaview', 'termux-open',
                           'xdg-open')
@@ -151,7 +158,8 @@ ENDUSAGETEXT
 # Shows configuration options.
 _show_config() {
   _msg_info "${app_name} configuration"
-  _msg_info "                View date:   $(_get "build" "date")"
+  _msg_info "                View date:   $(_get "view" "date")"
+  _msg_info "               Image type:   $(_get "image" "type")"
   _msg_info "            Target viewer:   $(_get "target" "viewer")"
   _msg_info "                 In files:   ${in_files[*]}"
 }
@@ -162,10 +170,11 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'p:cvh?' \
+    'i:p:cvh?' \
     arg; do
   case \
     "${arg}" in
+    i) override_image_type="${OPTARG}" ;;
     p) override_target_viewer="${OPTARG}" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
@@ -207,6 +216,9 @@ app_opts=(
   "$(_get \
        "target" \
        "viewer")"
+  "$(_get \
+       "image" \
+       "type")"
   "${in_files[@]}"
 )
 _picture_viewer \
