@@ -42,263 +42,65 @@ _get_conf_dir_path() {
     "${_dir}"
 }
 
-_node_path_get() {
-  npm \
-    -g \
-    list | \
-    head \
-      -n \
-        1
-}
 
-_hardhat_init() {
+
+_picture_viewer() {
   local \
-    _oldpwd
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_project_dir}"
-  echo \
-    "3\n" | \
-    npx \
-      hardhat \
-        init
-  rm \
-    -rf \
-    "contracts/Lock.sol"
-  cd \
-    "${_oldpwd}"
-}
-
-_node_package_path_get() {
- local \
-     _pkg="${1}" \
-     _package \
-    _node_path \
-    _pkg_path
-  _node_path="$( \
-    _node_path_get)"
-  _package="${_pkg}"
-  _pkg_path="${_node_path}/node_modules/${_pkg}"
-  if [ -d "${_pkg_path}" ]; then
-    _package="${_pkg_path}"
-  fi
-  echo \
-    "${_package}"
-}
-
-_npm_install() {
-  local \
-    _project_dir="${1}" \
-    _pkg="${2}" \
-    _npm_cmd=() \
-    _oldpwd \
-    _package
-  _package="$( \
-    _node_package_path_get \
-      "${_pkg}")"
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_project_dir}"
-  _npm_cmd=(
-    npm
-      install
-        --save-dev
-      "${_package}"
-  )
-  _msg_info \
-    "installing '${_package}' in '${_project_dir}'"
-  if [[ "${quiet}" == "y" ]]; then
-    "${_npm_cmd[@]}" 1&> \
-      /dev/null
-  elif [[ "${quiet}" == "n" ]]; then
-    "${_npm_cmd[@]}"
-  fi
-  cd \
-    "${_oldpwd}"
-}
-
-_hardhat_project_init() {
-  local \
-    _project_dir="${1}" \
-    _oldpwd \
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_project_dir}"
-  _msg_info \
-    "setting up hardhat environment"
-  _npm_install \
-    "${_project_dir}" \
-    "hardhat"
-  _npm_install \
-    "${_project_dir}" \
-    "@nomicfoundation/solidity-analyzer-android-arm-eabi"
-  if [[ "${quiet}" == "y" ]]; then
-    _hardhat_out="$( \
-      _hardhat_init \
-        "${_project_dir}")"
-  elif [[ "${quiet}" == "n" ]]; then
-    _hardhat_init \
-      "${_project_dir}"
-  fi
-  cd \
-    "${_oldpwd}"
-}
-
-_node_project_init() {
-  local \
-    _project_dir="${1}" \
-    _npm_cmd=() \
-    _oldpwd
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_project_dir}"
-  _npm_cmd=(
-    npm
-      init
-        -y
-  )
-  _msg_info \
-    "setting up node project"
-  if [[ "${quiet}" == "y" ]]; then
-    "${_npm_cmd[@]}" 1&>/dev/null
-  elif [[ "${quiet}" == "n" ]]; then
-    "${_npm_cmd[@]}"
-  fi
-  cd \
-    "${_oldpwd}"
-}
-
-_project_init() {
-  local \
-    _project_dir="${1}" \
-    _gyp_defines \
-    _oldpwd
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_project_dir}"
-  _gyp_defines="android_ndk_path=''"
-  export \
-    GYP_DEFINES="${_gyp_defines}" 
-  _node_project_init \
-    "${_project_dir}"
-  _hardhat_project_init \
-    "${_project_dir}"
-  cd \
-    "${_oldpwd}"
-}
-
-_project_build() {
-  local \
-    _project_dir="${1}" \
-    _out_dir="${2}" \
-    _oldpwd
-  _oldpwd="$( \
-    pwd)"
-  _msg_info \
-    "building contracts"
-  cd \
-    "${_project_dir}"
-  mkdir \
-    -p \
-    contracts
-  cp \
-    -r \
-    "${_target_contracts[@]}" \
-    "contracts"
-  npx \
-    hardhat \
-    compile
-  if [ -d "artifacts" ]; then
-    mv \
-      "artifacts/"* \
-      "${_out_dir}"
-  else
-    _msg_error \
-      "contract build failed" \
-      0
-    cd \
-      "${_oldpwd}"
-    exit \
-      1
-  fi
-  _msg_info \
-    "contract build successful"
-  cd \
-    "${_oldpwd}"
-}
-
-_solidity_compiler() {
-  local \
-    _compiler_backend="${1}" \
-    _out_dir="${2}" \
-    _work_dir="${3}" \
-    _target_contracts=() \
-    _oldpwd
+    _target_viewer="${1}" \
+    _in=()
   shift \
-    3
-  _target_contracts+=(
+    1
+  _in+=(
     "$@"
   )
-  if [[ "${_work_dir}" == "" ]]; then
-    _work_dir="$( \
-      mktemp \
-        -d)"
-  fi
-  _oldpwd="$( \
-    pwd)"
-  cd \
-    "${_work_dir}"
-  _project_init \
-    "${_work_dir}" || \
-    true
-  _project_build \
-    "${_work_dir}" \
-    "${_out_dir}"
-  cd \
-    "${_oldpwd}"
-  rm \
-    -rf \
-    "${_work_dir}"
+  "_${_viewer}" \
+    "${_in[@]}"
 }
 
-_out_dir_auto_detect(){
+_image_type_auto_detect(){
   local \
-    _contract_dir
-  if [[ "$(_get "target" "contracts")" != "" ]]; then
-    _contract_dir="$( \
-      dirname \
-       "${target_contracts}")"
+    _type
+  if [[ "${in_files}" == *".txt" ]]; then
+    _type="text"
   else
-    _contract_dir="$( \
-      pwd)"
+    _type="raw"
   fi
   echo \
-    "${_contract_dir}"
+    "${_type}"
+}
+
+_viewer_auto_detect(){
+  local \
+    _os \
+    _viewer
+  _os="$( \
+    uname \
+      -o)"
+  if [[ "${_os}" == "Android" ]]; then
+    _viewer="termux-open"
+  else
+    _viewer="xdg-open"
+  fi
+  if [[ "${image_type}" == "text" ]]; then
+    _viewer="cat"
+  fi
+  echo \
+    "${_viewer}"
 }
 
 _set_overrides() {
   _set_override \
-    "build" \
+    "view" \
     "date" \
     "$(_get_date_human)"
   _set_override \
-    "compiler" \
-    "backend" \
-    "hardhat"
+    "image" \
+    "type" \
+    "$(_image_type_auto_detect)"
   _set_override \
-    "work" \
-    "dir" \
-    "$(mktemp \
-         -d)"
-  _set_override \
-    "out" \
-    "dir" \
-    "$(_out_dir_auto_detect)"
+    "target" \
+    "viewer" \
+    "$(_viewer_auto_detect)"
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -323,12 +125,12 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
-Solidity compiler.
+Cross-platform picture viewer.
 
 Usage:
   $(_get "app" "name")
     [options]
-    [target_contract]
+    [in_file]
   options:
      -p <target_viewer>   Use a specific viewer
                           ('cacaview', 'termux-open',
