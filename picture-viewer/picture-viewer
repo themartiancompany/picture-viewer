@@ -15,7 +15,8 @@ source \
 # shellcheck disable=SC2034
 _global_variables() {
   view_date=""
-  in_file=()
+  target_viewer=""
+  in_files=()
   image_type=""
   color=""
   quiet=""
@@ -65,10 +66,10 @@ _picture_viewer() {
 _image_type_auto_detect(){
   local \
     _type
-  if [[ "${in_files}" == *".txt" ]]; then
+  _type="raw"
+  if [ ! -n "in_files" ] &&  \
+     [[ "${in_files}" == *".txt" ]]; then
     _type="text"
-  else
-    _type="raw"
   fi
   echo \
     "${_type}"
