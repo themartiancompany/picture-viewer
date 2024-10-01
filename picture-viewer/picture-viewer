@@ -74,12 +74,12 @@ _image_type_auto_detect(){
     uname \
       -o)"
   _type="raw"
+  if [[ "${_os}" == "GNU/Linux" ]] && \
+     [ -n "DISPLAY" ]; then
+    _type="text"
+  fi
   if [ ! -n "in_files" ]; then
     if [[ "${in_files}" == *".txt" ]]; then
-      _type="text"
-    fi
-    if [[ "${_os}" == "GNU/Linux" ]] && \
-       [ -n "DISPLAY" ]; then
       _type="text"
     fi
   fi
