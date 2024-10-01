@@ -52,17 +52,28 @@ _picture_viewer() {
   local \
     _target_viewer="${1}" \
     _image_type="${2}" \
-    _in=()
+    _in=() \
+    _viewer_opts=()
   shift \
     2
   _in+=(
     "$@"
   )
+  if [[ "${quiet}" == "n" ]]; then
+    _viewer_opts+=(
+      -v
+    )
+  fi
   _msg_info \
     "command: ${_target_viewer}"
   _msg_info \
     "argument: ${_in[*]}"
+  if [[ "${_image_type}" == "text" ]]; then
+    _viewer_opts+=(
+    )
+  fi
   "${_target_viewer}" \
+    "${_viewer_opts[@]}" \
     "${_in[@]}"
 }
 
