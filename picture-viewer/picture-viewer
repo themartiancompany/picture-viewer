@@ -68,11 +68,20 @@ _picture_viewer() {
 
 _image_type_auto_detect(){
   local \
-    _type
+    _type \
+    _os
+  _os="$( \
+    uname \
+      -o)"
   _type="raw"
-  if [ ! -n "in_files" ] &&  \
-     [[ "${in_files}" == *".txt" ]]; then
-    _type="text"
+  if [ ! -n "in_files" ]; then
+    if [[ "${in_files}" == *".txt" ]] || \
+      _type="text"
+    fi
+    if [[ "${_os}" == "GNU/Linux" ]] && \
+       [ -n "DISPLAY" ]; then
+      _type="text"
+    fi
   fi
   echo \
     "${_type}"
