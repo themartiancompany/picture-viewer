@@ -10,6 +10,10 @@ LIB_DIR=$(DESTDIR)$(PREFIX)/lib
 DOC_FILES=$(wildcard *.rst)
 SCRIPT_FILES=$(wildcard $(_PROJECT)/*)
 
+_INSTALL_FILE=install -vDm644
+_INSTALL_DIR=install -vdm755
+_INSTALL_EXE=install -vDm755
+
 all:
 
 check: shellcheck
@@ -17,7 +21,7 @@ check: shellcheck
 shellcheck:
 	shellcheck -s bash $(SCRIPT_FILES)
 
-install: install-scripts install-doc
+install: install-scripts install-doc install-man
 
 install-scripts:
 
@@ -26,5 +30,14 @@ install-scripts:
 install-doc:
 
 	install -vDm 644 $(DOC_FILES) -t $(DOC_DIR)
+
+install-man:
+
+	$(_INSTALL_DIR) \
+	  "$(MAN_DIR)/man1"
+	rst2man \
+	  "man/${_PROJECT}.1.rst" \
+	  "$(MAN_DIR)/man1/$(_PROJECT).1"
+
 
 .PHONY: check install install-doc install-scripts shellcheck

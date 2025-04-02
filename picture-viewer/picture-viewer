@@ -154,19 +154,21 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
+
 Cross-platform picture viewer.
 
 Usage:
-  $(_get "app" "name")
+  ${app_name}
     [options]
     [in_file]
+
   options:
      -t <image_type>      It can be 'raw' or 'text'
-                          Default: '$(_get "image" "type")'
+                          Default: '${image_type}'
      -p <target_viewer>   Use a specific viewer
                           ('cacaview', 'termux-open',
                           'xdg-open')
-                          Default: '$(_get "target" "viewer")'
+                          Default: '${target_viewer}'
 
      -h                   This message.
      -c                   Enable color output
