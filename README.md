@@ -26,7 +26,10 @@ Powerful cross-platform picture viewer.
 Works seamlessly on Android and GNU/Linux, both
 in a KMS console and when a GUI is running.
 
-It depends on the
+It depends on
+[ASCII Viewer](
+  https://github.com/themartiancompany/ascii-viewer)
+and on the
 [Crash Bash](
   https://github.com/themartiancompany/crash-bash)
 library.
