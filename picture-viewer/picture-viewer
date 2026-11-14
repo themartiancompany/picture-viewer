@@ -73,7 +73,8 @@ _picture_viewer() {
     _target_viewer="${1}" \
     _image_type="${2}" \
     _in=() \
-    _viewer_opts=()
+    _viewer_opts=() \
+    _msg=()
   shift \
     2
   _in+=(
@@ -84,10 +85,16 @@ _picture_viewer() {
       -v
     )
   fi
+  _msg=(
+    "Command: '${_target_viewer}'."
+  )
   _msg_info \
-    "command: ${_target_viewer}"
+    "${_msg[*]}"
+  _msg=(
+    "Argument: '${_in[*]}'."
+  )
   _msg_info \
-    "argument: ${_in[*]}"
+    "${_msg[*]}"
   if [[ "${_image_type}" == "text" ]]; then
     _viewer_opts+=(
     )
@@ -185,9 +192,9 @@ Usage:
   options:
      -t <image_type>      It can be 'raw' or 'text'
                           Default: '${image_type}'
-     -p <target_viewer>   Use a specific viewer
-                          ('cacaview', 'termux-open',
-                          'xdg-open')
+     -p <target_viewer>   Use a specific viewer.
+                          It can be 'cacaview',
+                          'termux-open', 'xdg-open')
                           Default: '${target_viewer}'
 
      -h                   This message.
